@@ -1,12 +1,70 @@
-import React from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 import { Link } from 'react-router-dom'
 import { FiArrowLeft } from 'react-icons/fi'
+import { Map, TileLayer, Marker } from 'react-leaflet'
+import axios from 'axios'
+import api from '../../services/api'
 
 import { Container, Form, Field, FieldGroup, ItemsGrid, Button } from './styles';
 
 import logo from '../../assets/logo.svg'
 
+interface Item {
+  id: string;
+  title: string;
+  image_url: string;
+}
+
+interface IBGEUFResponse {
+  sigla: string;
+}
+
+interface IBGECityResponse {
+  nome: string;
+}
+
 const CreatePoint: React.FC = () => {
+  const [items, setItems] = useState<Item[]>([])
+  const [ufs, setUfs] = useState<string[]>([])
+  const [cities, setCities] = useState<string[]>([])
+
+  const [selectedUf, setSelectedUf] = useState('0')
+
+  useEffect(() => {
+    api.get('items').then(response => {
+      setItems(response.data)
+    })
+  }, [])
+
+  useEffect(() => {
+    axios.get<IBGEUFResponse[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados').then(response => {
+      const ufInitials = response.data.map(uf => uf.sigla);
+
+      setUfs(ufInitials)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (selectedUf === '0') {
+      return
+    }
+
+    axios
+    .get<IBGECityResponse[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`)
+    .then(response => {
+      const cityNames = response.data.map(city => city.nome);
+      
+      setCities(cityNames)
+    })
+  }, [selectedUf])
+
+  function handleSelectUF (event: ChangeEvent<HTMLSelectElement>)
+  {
+    const uf = event.target.value
+
+    setSelectedUf(uf)
+  }
+
   return (
     <Container>
       <header>
@@ -63,6 +121,14 @@ const CreatePoint: React.FC = () => {
           </FieldGroup>
         </fieldset>
 
+        <Map style={{ width: '100%', height: '300px' }} center={[-22.9399681, -47.1873044]} zoom={15}>
+          <TileLayer
+            attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Marker position={[-22.9399681, -47.1873044]}/>  
+        </Map>
+
         <fieldset>
           <legend>
             <h2>
@@ -72,17 +138,33 @@ const CreatePoint: React.FC = () => {
               Selecione o endereço do mapa
             </span>
           </legend>
+
           <FieldGroup>
             <Field>
               <label htmlFor="uf">Estado (UF)</label>
-              <select name="uf" id="uf">
+              <select 
+                name="uf" 
+                id="uf" 
+                value={selectedUf} 
+                onChange={handleSelectUF}
+              >
                 <option value="0">Selecione uma UF</option>
+                {ufs.map(uf => {
+                  return (
+                    <option key={uf} value={uf}>{uf}</option>
+                  )
+                })}
               </select>
             </Field>
             <Field>
               <label htmlFor="city">Cidade</label>
               <select name="city" id="city" style={{ marginLeft: '20px' }}>
                 <option value="0">Selecione uma cidade</option>
+                {cities.map(city => {
+                  return (
+                    <option key={city} value={city}>{city}</option>
+                  )
+                })}
               </select>
             </Field>
           </FieldGroup>
@@ -99,30 +181,15 @@ const CreatePoint: React.FC = () => {
           </legend>
 
           <ItemsGrid>
-            <li>
-              <img src="http://localhost:3333/uploads/lampadas.svg" alt=""/>
-              <span>Lampa</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/baterias.svg" alt=""/>
-              <span>Bateria</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/lampadas.svg" alt=""/>
-              <span>Lampa</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/lampadas.svg" alt=""/>
-              <span>Lampa</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/lampadas.svg" alt=""/>
-              <span>Lampa</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/lampadas.svg" alt=""/>
-              <span>Lampa</span>
-            </li>
+            {items.map(item => {
+              return (
+                <li key={item.id}>
+                  <img src={item.image_url} alt={item.title}/>
+                  <span>{item.title}</span>
+                </li>
+              )
+            })}
+            
           </ItemsGrid>
         </fieldset>
 
