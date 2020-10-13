@@ -5,7 +5,7 @@ import backgroundIMG from  '../../assets/home-background.svg'
 export const Container = styled.div`
   height: 100vh;
   width: 100%;
-  background: url(${backgroundIMG}) no-repeat 700px bottom;
+  background: url(${backgroundIMG}) no-repeat 650px bottom;
 `;
 
 export const Content = styled.div`
