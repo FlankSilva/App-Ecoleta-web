@@ -1,4 +1,8 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+
+interface ItemProps {
+  teste: boolean;
+}
 
 export const Container = styled.div`
   width: 100%;
@@ -109,31 +113,39 @@ export const ItemsGrid = styled.ul`
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   list-style: none;
+`
 
-  li {
-    background: #f5f5f5;
-    border: 2px solid #f5f5f5;
-    height: 180px;
-    border-radius: 8px;
-    padding: 32px 24px 16px;
+export const Item = styled.li<ItemProps>`
+  background: #f5f5f5;
+  border: 2px solid #f5f5f5;
+  height: 180px;
+  border-radius: 8px;
+  padding: 32px 24px 16px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  ${props => 
+    props.teste &&
+    css`
+      background: #E1FAEC;
+      border: 2px solid #34CB79;
+    `
+  }
+
+  span {
+    flex: 1;
+    margin-top: 12px;
 
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     align-items: center;
-
-    text-align: center;
-
-    cursor: pointer;
-
-    span {
-      flex: 1;
-      margin-top: 12px;
-
-      display: flex;
-      align-items: center;
-      color: var(--title-color)
-    }
+    color: var(--title-color)
   }
 `
 
