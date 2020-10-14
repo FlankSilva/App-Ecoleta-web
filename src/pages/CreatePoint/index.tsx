@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { FiArrowLeft } from 'react-icons/fi'
 import { Map, TileLayer, Marker } from 'react-leaflet'
 import axios from 'axios'
@@ -42,6 +42,8 @@ const CreatePoint: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState('0')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0])
+
+  const history = useHistory()
 
   useEffect(() => {
     api.get('items').then(response => {
@@ -141,6 +143,7 @@ const CreatePoint: React.FC = () => {
       await api.post('points', data)
 
       toast.success('Registro criado com sucesso!');
+      history.push('/')
     } catch (error) {
       toast.error('Por favor tente novamente!');
     }
